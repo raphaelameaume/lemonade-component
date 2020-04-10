@@ -1,6 +1,6 @@
 let components = [];
-let currentModules = new Map();
-let MODULE_ID = 0;
+let currentComponents = new Map();
+let COMPONENT_ID = 0;
 
 export function add(name, create) {
     let c = {
@@ -23,7 +23,7 @@ export async function watch(element = document, { onMount = noop } = {}) {
             for (let i = 0; i < addedNodes.length; i++) {
                 let { parentNode } = addedNodes[i];
 
-                await mount(addedNodes[i].parentNode);
+                await mount(addedNodes[i]);
                 onMount();
             }
 
@@ -45,7 +45,7 @@ export async function watch(element = document, { onMount = noop } = {}) {
 }
 
 export async function mount(element, list = components) {
-    let scopedModules = [];
+    let scopedComponents = [];
 
     for (let i = 0; i < list.length; i++) {
         let { name, create } = list[i];
@@ -59,15 +59,15 @@ export async function mount(element, list = components) {
                 let childComponents = await mount(element, list);
                 let children = childComponents.map(child => child.instance);
 
-                let id = MODULE_ID++;
+                let id = COMPONENT_ID++;
                 let m = await createComponent(id, element, create, children);
-                currentModules.set(`${m.id}`, m);
-                scopedModules.push(m);
+                currentComponents.set(`${m.id}`, m);
+                scopedComponents.push(m);
             }
         }
     }
 
-    return scopedModules;
+    return scopedComponents;
 }
 
 export function unmount(element) {
@@ -76,12 +76,12 @@ export function unmount(element) {
 
     let id = element.dataset['mId'];
 
-    if (currentModules.has(id)) {
-        let m = currentModules.get(id);
+    if (currentComponents.has(id)) {
+        let m = currentComponents.get(id);
 
         m.destroy();
         element.removeAttribute('data-m-id');
-        currentModules.delete(id);
+        currentComponents.delete(id);
 
         m = null;
     }
