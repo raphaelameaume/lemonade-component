@@ -3,7 +3,9 @@ class Component {
         this.element = element;
         this.children = children;
 
-        onDestroy(this.onDestroy.bind(this));
+        onDestroy(() => {
+            this.onDestroy();
+        });
     }
 
     onDestroy() { }
