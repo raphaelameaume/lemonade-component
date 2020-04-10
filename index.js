@@ -46,14 +46,14 @@ export async function mount(element, list = components) {
         let results = element.querySelectorAll(query);
 
         for (let i = 0; i < results.length; i++) {
-            let element = results[i];
+            let result = results[i];
 
-            if (!element.dataset[`mId`]) {
-                let childComponents = await mount(element, list);
+            if (!result.dataset[`mId`]) {
+                let childComponents = await mount(result, list);
                 let children = childComponents.map(child => child.instance);
 
                 let id = COMPONENT_ID++;
-                let c = await createComponent(id, element, create, children);
+                let c = await createComponent(id, result, create, children);
                 currentComponents.set(`${c.id}`, c);
                 scopedComponents.push(c);
             }
@@ -100,6 +100,8 @@ async function createComponent(id, element, create, children) {
 
     return c;
 }
+
+export { default as Component } from "./Component";
 
 export default {
     mount,
