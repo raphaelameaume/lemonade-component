@@ -1,16 +1,12 @@
 let components = [];
 let currentComponents = new Map();
 let COMPONENT_ID = 0;
+let noop = () => {};
 
 export function add(name, create) {
-    let c = {
-        name,
-        create,
-    };
+    let l = components.push({ name, create });
 
-    components.push(c);
-
-    return c;
+    return components[l-1];
 }
 
 export async function watch(element = document, { onMount = noop } = {}) {
@@ -60,9 +56,9 @@ export async function mount(element, list = components) {
                 let children = childComponents.map(child => child.instance);
 
                 let id = COMPONENT_ID++;
-                let m = await createComponent(id, element, create, children);
-                currentComponents.set(`${m.id}`, m);
-                scopedComponents.push(m);
+                let c = await createComponent(id, element, create, children);
+                currentComponents.set(`${c.id}`, c);
+                scopedComponents.push(c);
             }
         }
     }
@@ -82,32 +78,28 @@ export function unmount(element) {
         m.destroy();
         element.removeAttribute('data-m-id');
         currentComponents.delete(id);
-
-        m = null;
     }
 
     for (let i = 0; i < results.length; i++) {
-        let result = results[i];
-
-        unmount(result);
+        unmount(results[i]);
     }
 }
 
 async function createComponent(id, element, create, children) {
     element.setAttribute('data-m-id', id);
 
-    const m = {
+    const c = {
         id,
         destroy: noop,
     };
 
     function destroy(cb = noop) {
-        m.destroy = cb;
+        c.destroy = cb;
     }
 
-    let c = await create({ element, children, onDestroy: destroy });
-    m.name = create.name;
-    m.instance = c;
+    let instance = await create({ element, children, onDestroy: destroy });
+    c.name = create.name;
+    c.instance = instance;
 
     return m;
 }
