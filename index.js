@@ -9,7 +9,7 @@ export function add(name, create) {
     return components[l-1];
 }
 
-export async function watch(element = document, { onMount = noop } = {}) {
+export async function watch(element = document) {
     await mount(element);
 
     async function onChange(mutationList) {
@@ -17,10 +17,7 @@ export async function watch(element = document, { onMount = noop } = {}) {
             let { addedNodes, removedNodes } = mutationList[i];
 
             for (let i = 0; i < addedNodes.length; i++) {
-                let { parentNode } = addedNodes[i];
-
                 await mount(addedNodes[i]);
-                onMount();
             }
 
             for (let i = 0; i < removedNodes.length; i++) {
@@ -101,7 +98,7 @@ async function createComponent(id, element, create, children) {
     c.name = create.name;
     c.instance = instance;
 
-    return m;
+    return c;
 }
 
 export default {
