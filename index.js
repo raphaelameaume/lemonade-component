@@ -1,5 +1,5 @@
 let components = [];
-let currentComponents = new Map();
+let currentComponents = [];
 let COMPONENT_ID = 0;
 let noop = () => {};
 
@@ -17,7 +17,7 @@ export async function watch(element = document) {
             let { addedNodes, removedNodes } = mutationList[i];
 
             for (let i = 0; i < addedNodes.length; i++) {
-                await mount(addedNodes[i]);
+                await mount(addedNodes[i].parentNode);
             }
 
             for (let i = 0; i < removedNodes.length; i++) {
@@ -37,25 +37,57 @@ export async function watch(element = document) {
     };
 }
 
-export async function mount(element, list = components) {
+function check(element) {
+    let elements = element.querySelectorAll('*');
+    let names = components.map( component => component.name );
+
+    let missingComponents = [];
+
+    for (let i = 0; i < elements.length; i++) {
+        let attributes = Array.from(elements[i].attributes);
+
+        for (let j = 0; j < attributes.length; j++) {
+            let attribute = attributes[j];
+            if (attribute.name.startsWith('data-component')) {
+                let name = attribute.name.split('-').splice(2).join('-');
+
+                if (names.indexOf(name) < 0 && missingComponents.indexOf(name) < 0) {
+                    missingComponents.push(name);
+                }
+            }
+        }
+    }
+
+    for (let i = 0; i < missingComponents.length; i++) {
+        console.warn(`Component ${missingComponents[i]} found but it doesn't exist.`);
+    }
+}
+
+export async function mount(element, list = components, depth = 0) {
     let scopedComponents = [];
+
+    if (depth === 0) {
+        check(element);
+    }
 
     for (let i = 0; i < list.length; i++) {
         let { name, create } = list[i];
-        let query = `[data-module-${name}]`;
-        let results = element.querySelectorAll(query);
-
+        let attributeName = `component-${name}`;
+        let query = `[data-${attributeName}]:not([data-c-id])`;
+        
+        let results = Array.from(element.querySelectorAll(query)).filter( (el) => el.dataset['cId'] === undefined);
+        
         for (let i = 0; i < results.length; i++) {
             let result = results[i];
 
-            if (!result.dataset[`mId`]) {
-                let childComponents = await mount(result, list);
+            if (!result.dataset[`cId`]) {
+                let childComponents = await mount(result, list, depth + 1);
                 let children = childComponents.map(child => child.instance);
 
                 let id = COMPONENT_ID++;
-                let c = await createComponent(id, result, create, children);
-                currentComponents.set(`${c.id}`, c);
-                scopedComponents.push(c);
+                let c = await mountComponent(id, result, create, children);
+                currentComponents[id] = c;
+                scopedComponents[scopedComponents.length] = c;
             }
         }
     }
@@ -64,17 +96,15 @@ export async function mount(element, list = components) {
 }
 
 export function unmount(element) {
-    let query = `[data-m-id]`;
+    let query = `[data-c-id]`;
     let results = element.querySelectorAll(query);
+    
+    let id = parseInt(element.dataset['cId']);
+    let c = currentComponents[id];
 
-    let id = element.dataset['mId'];
-
-    if (currentComponents.has(id)) {
-        let m = currentComponents.get(id);
-
-        m.destroy();
-        element.removeAttribute('data-m-id');
-        currentComponents.delete(id);
+    if (c) {
+        c.destroy();
+        element.removeAttribute('data-c-id');
     }
 
     for (let i = 0; i < results.length; i++) {
@@ -82,8 +112,8 @@ export function unmount(element) {
     }
 }
 
-async function createComponent(id, element, create, children) {
-    element.setAttribute('data-m-id', id);
+async function mountComponent(id, element, create, children) {
+    element.setAttribute('data-c-id', id);
 
     const c = {
         id,
