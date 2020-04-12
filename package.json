@@ -1,0 +1,21 @@
+{
+  "name": "lemonade-component",
+  "version": "0.0.1",
+  "description": "Minimal component library",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raphaelameaume/lemonade-component.git"
+  },
+  "keywords": [
+    "component",
+    "lemonade",
+    "dom"
+  ],
+  "author": "Raphaël Améaume",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/raphaelameaume/lemonade-component/issues"
+  },
+  "homepage": "https://github.com/raphaelameaume/lemonade-component#readme"
+}

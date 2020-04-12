@@ -1,6 +1,8 @@
 # lemonade-component 🏷
 
-(alpha) `lemonade-component` is a minimal component library inspired by [modularjs](https://github.com/modularorg/modularjs/). Its only purpose is to look for registered DOM components and execute a function when it finds one. It supports dynamic imports and can watch for DOM changes. It is not a v-dom library.
+⚠️ ALPHA: This code has not been fully tested and the API might have some breaking changes in the future
+
+`lemonade-component` is a minimal component library inspired by [modularjs](https://github.com/modularorg/modularjs/). Its only purpose is to look for registered DOM components and execute a function when it finds one. It supports dynamic imports and can watch for DOM changes. It is not a v-dom library.
  
 
 ## Installation
