@@ -1,9 +1,10 @@
 let components = [];
 let currentComponents = [];
 let COMPONENT_ID = 0;
+let attributeNameID = 'data-c-id';
 let noop = () => {};
 
-export function add(name, create) {
+export function c(name, create) {
     let l = components.push({ name, create });
 
     return components[l-1];
@@ -96,15 +97,15 @@ export async function mount(element, list = components, depth = 0) {
 }
 
 export function unmount(element) {
-    let query = `[data-c-id]`;
+    let query = `[${attributeNameID}]`;
     let results = element.querySelectorAll(query);
     
     let id = parseInt(element.dataset['cId']);
-    let c = currentComponents[id];
+    let component = currentComponents[id];
 
-    if (c) {
-        c.destroy();
-        element.removeAttribute('data-c-id');
+    if (component) {
+        component.destroy();
+        currentComponents[id] = null;
     }
 
     for (let i = 0; i < results.length; i++) {
@@ -113,18 +114,18 @@ export function unmount(element) {
 }
 
 async function mountComponent(id, element, create, children) {
-    element.setAttribute('data-c-id', id);
+    element.setAttribute(attributeNameID, id);
 
-    const c = {
+    const component = {
         id,
-        destroy: noop,
+        destroy: (fn = noop) => {
+            fn();
+
+            element.removeAttribute(attributeNameID, id);
+        },
     };
 
-    function destroy(cb = noop) {
-        c.destroy = cb;
-    }
-
-    let instance = await create({ element, children, onDestroy: destroy });
+    let instance = await create({ element, children, onDestroy: c.destroy });
     c.name = create.name;
     c.instance = instance;
 
@@ -136,6 +137,6 @@ export { default as Component } from "./Component";
 export default {
     mount,
     unmount,
-    add,
+    c,
     watch,
 };
