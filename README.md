@@ -80,8 +80,10 @@ c('slider', () => import('./Slider.js'));
 
 ### Watch for DOM changes
 
+Use `watch` instead of `mount`
+
 ```js
-import { watch } from "lemonade-component
+import { watch } from "lemonade-component";
 
 function Slider({ onDestroy }) {
     console.log('Slider :: mounted');
@@ -92,8 +94,7 @@ function Slider({ onDestroy }) {
 
 c('slider', Slider);
 
-// use watc instead of mount
-watch(document.body); 
+watch(document.body);
 // Slider :: mounted
 
 document.getElementById('root').innerHTML = '';
