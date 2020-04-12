@@ -11,33 +11,60 @@ npm install lemonade-component
 
 ## Usage
 
-### Mount component
+Let's suppose our HTML looks like this:
 
 ```html
 <body>
-    <ul data-component-slider>
-        <li data-component-slider-item></li>
-        <li data-component-slider-item></li>
-        <li data-component-slider-item></li>
-    </ul>
+    <div id="root">
+        <ul data-component-slider>
+            <li data-component-slider-item></li>
+            <li data-component-slider-item></li>
+            <li data-component-slider-item></li>
+        </ul>
+    </div>
 </body>
 ```
 
-main.js
-```
+### Mount a component
+
+```js
 import { c, mount } from "lemonade-component"
 
-function Slider({ element, children, onDestroy }) {
-    // Slider is mounted
-    console.log(children); // [SliderItem, SliderItem, SliderItem];
-}
-
 function Slider({ element }) {
-    // SliderItem is mounted
-    console.log(element) // <li data-component-slider-item></li>
+    // Slider is mounted
+    console.log(element); // <ul data-component-slider></ul>
 }
 
 c('slider', Slider);
+
+mount(document.body);
+```
+
+### Unmount components
+
+```js
+import { unmount } from "lemonade-component";
+
+function Slider({ onDestroy }) {
+    onDestroy(() => {
+        console.log('Slider :: unmounted');
+    })
+}
+
+unmount(document.body);
+// Slider :: unmounted
+```
+
+### Access children components
+
+```js
+function Slider({ children }) {
+    console.log(children); // [SliderItem, SliderItem, SliderItem]
+}
+
+function SliderItem() {}
+
+c('slider', SliderItem);
 c('slider-item', SliderItem);
 
 mount(document.body);
@@ -53,14 +80,6 @@ c('slider', () => import('./Slider.js'));
 
 ### Watch for DOM changes
 
-```html
-<body>
-    <div id="root">
-        <ul data-component-slider></ul>
-    </ul>
-</body>
-```
-
 ```js
 import { watch } from "lemonade-component
 
@@ -73,7 +92,8 @@ function Slider({ onDestroy }) {
 
 c('slider', Slider);
 
-watch(document.body);
+// use watc instead of mount
+watch(document.body); 
 // Slider :: mounted
 
 document.getElementById('root').innerHTML = '';
@@ -86,10 +106,10 @@ document.getElementById('root').innerHTML = '';
 import { mount } from "lemonade-component";
 
 const SliderComponent = c('slider', Slider);
-const NavigationComponent = c('navigation', Navigation);
+const SliderItemComponent = c('slider-item', SliderItem);
 
-mount(document.body, [NavigationComponent]);
-// SliderComponent will not be mounted if found
+mount(document.body, [SliderComponent]);
+// SliderItemComponent will not be mounted if found
 ```
 
 
