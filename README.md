@@ -113,6 +113,9 @@ mount(document.body, [SliderComponent]);
 // SliderItemComponent will not be mounted if found
 ```
 
+## Credits
+- [modularjs](https://github.com/modularorg/modularjs/)
 
+## License
 
-
+MIT License, see [LICENSE](https://github.com/raphaelameaume/lemonade-component/tree/master/LICENSE) for details
